@@ -15,8 +15,12 @@ namespace folder_sync
 	void diff_token::copy_this(std::error_code & ec)
 	{
 		fs::create_directory(this->target_dest.parent_path());
+		if (this->type==only_in_target)
+		{
+			fs::copy_file(this->target_dest, this->source_dest, fs::copy_options::overwrite_existing, ec);
+			return;
+		}
 		fs::copy_file(this->source_dest, this->target_dest,fs::copy_options::overwrite_existing, ec);
-		std::string s =ec.message();
 	}
 	void diff_token::swap_source_target()
 	{
@@ -397,10 +401,11 @@ namespace folder_sync
 		return result;
 	}
 
-	void back_up(const path & source_folder, const path & target_folder, size_t time_in_seconds, size_t recursive_depth, type_of_backup type, synchronisation_communication & sc)
+	std::thread back_up(const path & source_folder, const path & target_folder, size_t time_in_seconds, size_t recursive_depth, type_of_backup type, synchronisation_communication & sc)
 	{
+		back_up_function(source_folder, target_folder, time_in_seconds, recursive_depth, type, sc);
 		std::thread t1(back_up_function, std::ref(source_folder), std::ref(target_folder), time_in_seconds, recursive_depth, type, std::ref(sc));
-
+		return t1;
 	}
 
 	std::thread real_time_sync(const path & source_folder, const path & target_folder, size_t time_in_seconds, size_t recursive_depth, type_of_sync type, synchronisation_communication & sc)

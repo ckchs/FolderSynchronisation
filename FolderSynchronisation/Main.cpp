@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 	fs::path compare_file;
 	bool real_time=false;
 	bool back_up=false;
-	int time_in_seconds = 5;
+	int time_in_seconds = 60;
 	bool diffs_to_file = false;
 	bool diffs_from_file = false;
 	int recursive_depth=0;
@@ -48,13 +48,12 @@ int main(int argc, char *argv[])
 			if (strncmp(argv[i], "-backup", 6) == 0)
 			{
 				back_up = true;
-				time_in_seconds = std::stoi(argv[i + 2]);
-				if (strncmp(argv[i+1], "everything", 6) == 0)
+				if (strncmp(argv[i+1], "everything", 10) == 0)
 				{
 					type_of_backup = folder_sync::type_of_backup::everything;
 					i++;
 				}
-				else if (strncmp(argv[i+1], "only-changed", 6) == 0)
+				else if (strncmp(argv[i+1], "only-changed", 12) == 0)
 				{
 					type_of_backup = folder_sync::type_of_backup::only_changed;
 					i++;
@@ -63,7 +62,6 @@ int main(int argc, char *argv[])
 				{
 					wrong_arguments = true;
 				}
-				i++;
 				continue;
 			}
 			if (strncmp(argv[i], "-compare_file", 13) == 0)
@@ -75,6 +73,12 @@ int main(int argc, char *argv[])
 			if (strncmp(argv[i], "-recursive", 10) == 0)
 			{
 				recursive_depth = std::stoi(argv[i + 1]);
+				i++;
+				continue;
+			}
+			if (strncmp(argv[i], "-time", 5) == 0)
+			{
+				time_in_seconds = std::stoi(argv[i + 1]);
 				i++;
 				continue;
 			}
@@ -133,13 +137,14 @@ int main(int argc, char *argv[])
 	{
 		std::string s;
 		folder_sync::synchronisation_communication sc;
-		folder_sync::back_up(source, target, time_in_seconds, recursive_depth, type_of_backup, sc);
+		auto t=folder_sync::back_up(source, target, time_in_seconds, recursive_depth, type_of_backup, sc);
 		std::cout << "To stop backuping write 's'";
 		while (s!="s")
 		{
 			std::cin >> s;
 		}
 		sc.dont_do_next = true;
+		t.join();
 		return 0;
 	}
 	if (real_time)

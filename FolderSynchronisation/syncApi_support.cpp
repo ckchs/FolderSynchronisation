@@ -99,36 +99,35 @@ namespace folder_sync
 			time_t now = time(0);
 			struct tm buffer;
 			localtime_s(&buffer,&now);
-			strftime(buff, 100, "%Y-%m-%d-%H:%M:%S", &buffer);
+			strftime(buff, 100, "%Y-%m-%d-%H-%M-%S", &buffer);
 			path new_folder= target_folder/buff;
 			if (type==only_changed)
 			{
-				bool exist_last_folder = false;
-				path last_folder;
-				auto a = target_folder / "last_folder.info";
-				if (fs::exists(a))
-				{
-					std::ifstream ofs(a);
-					std::string s;
-					std::getline(ofs, s);
-					last_folder = s;
-				}
+				fs::path original=target_folder / "original";
 				folder_differences fd;
-				differentiate_folders(source_folder, last_folder, recursive_depth, fd);
+				if (fs::exists(original))
+				{
+					differentiate_folders(source_folder, original, recursive_depth, fd);
+				}
+				else
+				{
+					auto a = std::vector<fs::path>{ original };
+					results = synchronise(source_folder, a, recursive_depth, source_to_target_with_diffs);
+					continue;
+				}
 				for (auto && element : fd.in_both_folders)
 				{
-					path new_target=new_folder / element.target_dest.filename();
-					element.target_dest = new_target;
+					auto a = element.target_dest.generic_string();
+					a.replace(a.find("original"), 8, buff);
+					element.target_dest = fs::path(a);
 				}
 				for (auto && element : fd.only_in_target_or_source)
 				{
-					path new_target = new_folder / element.target_dest.filename();
-					element.target_dest = new_target;
+					auto a = element.target_dest.generic_string();
+					a.replace(a.find("original"), 8, buff);
+					element.target_dest = fs::path(a);
 				}
 				results = copy_folder_differences(fd, source_to_target_with_diffs);
-				std::ofstream os(a);
-				os << buff << std::endl;
-				os.close();
 			}
 			else //copy everything
 			{

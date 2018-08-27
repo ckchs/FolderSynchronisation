@@ -142,7 +142,7 @@ namespace folder_sync
 
 
 
-	void back_up(const path & source_folder,const path & target_folder, size_t time_in_seconds, size_t recursive_depth, type_of_backup type, synchronisation_communication & sc);
+	std::thread back_up(const path & source_folder,const path & target_folder, size_t time_in_seconds, size_t recursive_depth, type_of_backup type, synchronisation_communication & sc);
 
 	//call synchronise every x seconds
 	std::thread real_time_sync(const path & source_folder, const path & target_folder, size_t time_in_seconds, size_t recursive_depth, type_of_sync type, synchronisation_communication & sc);
