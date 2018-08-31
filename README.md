@@ -1,5 +1,4 @@
 # FolderSynchronisation
-# Folder_Synchronization
 zapoctovy program
 
 ## Uzivatelska dokumentacia
