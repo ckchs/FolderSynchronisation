@@ -19,7 +19,7 @@ zapoctovy program
 
 -time *ako casto sa ma v real-time/backup synchronizacii vykonat synchronizacia (v sekundach)*
 
--diffs_from_file vykona rozdiely ako ich uzivatel popisal do filu
+-diffs_from_file *vykona rozdiely ako ich uzivatel popisal do filu*
 
 -diffs_to_file *ulozi rozdiely do filu*
 
@@ -69,7 +69,7 @@ Kazdu minutu prebehne synchronizacia (nastavitelne pomocou -time)
 Priklady pouzitia:
 z priecinku folder1 do folder2 kazde 2 minuty sa obojsmerne synchronizuje ak je subor s rovnakym nazvom v oboch priecinkoch tak sa zachovaju oba
 
-	-s \folder1 -t \folder2 -r -type bwnd -rts -time 120
+	-s \folder1 -t \folder2 -recursive_depth 10 -type bwnd -rts -time 120
 	
 ### Zalohovanie
 Kazdu minutu prebehne synchronizacia (nastavitelne pomocou -time)
@@ -77,4 +77,4 @@ Kazdu minutu prebehne synchronizacia (nastavitelne pomocou -time)
 Priklady pouzitia:
 priecinok folder1 zalohuje do folder2, kazde 3 minuty a bude ukladat iba zmeny ktore nastali
 
-	-s \folder1 -t \folder2 -r -time 180 -backup only-changed
+	-s \folder1 -t \folder2 -recursive_depth 10 -time 180 -backup only-changed
