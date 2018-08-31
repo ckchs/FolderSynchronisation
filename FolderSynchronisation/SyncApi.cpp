@@ -354,14 +354,14 @@ namespace folder_sync
 
 				case both_way_diffs_to_target:
 				case source_to_target_with_diffs:
-					element.swap_source_target();
 					element.copy_this(ec);
-					element.swap_source_target();
 					break;
 
 				case both_way_diffs_to_source:
 				case target_to_source_with_diffs:
+					element.swap_source_target();
 					element.copy_this(ec);
+					element.swap_source_target();
 					break;
 				}
 

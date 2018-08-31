@@ -115,6 +115,7 @@ namespace folder_sync
 					results = synchronise(source_folder, a, recursive_depth, source_to_target_with_diffs);
 					continue;
 				}
+				results= copy_folder_differences(fd, source_to_target_with_diffs);
 				for (auto && element : fd.in_both_folders)
 				{
 					auto a = element.target_dest.generic_string();
@@ -127,7 +128,8 @@ namespace folder_sync
 					a.replace(a.find("original"), 8, buff);
 					element.target_dest = fs::path(a);
 				}
-				results = copy_folder_differences(fd, source_to_target_with_diffs);
+				auto a = copy_folder_differences(fd, source_to_target_with_diffs);
+				results.insert(results.end(), a.begin(), a.end());
 			}
 			else //copy everything
 			{
