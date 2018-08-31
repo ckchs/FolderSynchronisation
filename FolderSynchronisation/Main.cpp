@@ -5,20 +5,21 @@
 
 int main(int argc, char *argv[])
 {
-	
-	namespace fs= std::experimental::filesystem;
+
+	namespace fs = std::experimental::filesystem;
 	bool wrong_arguments = false;
 	fs::path source;
 	fs::path target;
 	fs::path compare_file;
-	bool real_time=false;
-	bool back_up=false;
+	bool compare_file_set = false;
+	bool real_time = false;
+	bool back_up = false;
 	int time_in_seconds = 60;
 	bool diffs_to_file = false;
 	bool diffs_from_file = false;
-	int recursive_depth=0;
-	folder_sync::type_of_sync type_of_sync=folder_sync::type_of_sync::not_set;
-	folder_sync::type_of_backup type_of_backup=folder_sync::type_of_backup::backup_not_set;
+	int recursive_depth = 0;
+	folder_sync::type_of_sync type_of_sync = folder_sync::type_of_sync::not_set;
+	folder_sync::type_of_backup type_of_backup = folder_sync::type_of_backup::backup_not_set;
 	try {
 		for (int i = 1; i < argc; i++)
 		{
@@ -48,12 +49,12 @@ int main(int argc, char *argv[])
 			if (strncmp(argv[i], "-backup", 6) == 0)
 			{
 				back_up = true;
-				if (strncmp(argv[i+1], "everything", 10) == 0)
+				if (strncmp(argv[i + 1], "everything", 10) == 0)
 				{
 					type_of_backup = folder_sync::type_of_backup::everything;
 					i++;
 				}
-				else if (strncmp(argv[i+1], "only-changed", 12) == 0)
+				else if (strncmp(argv[i + 1], "only-changed", 12) == 0)
 				{
 					type_of_backup = folder_sync::type_of_backup::only_changed;
 					i++;
@@ -66,6 +67,7 @@ int main(int argc, char *argv[])
 			}
 			if (strncmp(argv[i], "-compare_file", 13) == 0)
 			{
+				compare_file_set = true;
 				compare_file = fs::path(argv[i + 1]);
 				i++;
 				continue;
@@ -93,7 +95,7 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
-	catch(...)
+	catch (...)
 	{
 		wrong_arguments = true;
 	}
@@ -106,22 +108,30 @@ int main(int argc, char *argv[])
 	}
 	if (diffs_from_file)
 	{
+		if (!compare_file_set)
+		{
+			wrong_arguments = true;
+		}
 		boolcounter++;
 	}
 	if (diffs_to_file)
 	{
+		if (!compare_file_set)
+		{
+			wrong_arguments = true;
+		}
 		boolcounter++;
 	}
 	if (real_time)
 	{
 		boolcounter++;
 	}
-	if (boolcounter>1)
+	if (boolcounter > 1)
 	{
 		wrong_arguments = true;
 		std::cout << "Too many things to do";
 	}
-	if (type_of_sync==folder_sync::type_of_sync::bad_type)
+	if (type_of_sync == folder_sync::type_of_sync::bad_type)
 	{
 		wrong_arguments = true;
 		std::cout << "Bad type";
@@ -137,9 +147,9 @@ int main(int argc, char *argv[])
 	{
 		std::string s;
 		folder_sync::synchronisation_communication sc;
-		auto t=folder_sync::back_up(source, target, time_in_seconds, recursive_depth, type_of_backup, sc);
+		auto t = folder_sync::back_up(source, target, time_in_seconds, recursive_depth, type_of_backup, sc);
 		std::cout << "To stop backuping write 's'";
-		while (s!="s")
+		while (s != "s")
 		{
 			std::cin >> s;
 		}
@@ -151,7 +161,7 @@ int main(int argc, char *argv[])
 	{
 		std::string s;
 		folder_sync::synchronisation_communication sc;
-		auto t =folder_sync::real_time_sync(source, target, time_in_seconds, recursive_depth, type_of_sync, sc);
+		auto t = folder_sync::real_time_sync(source, target, time_in_seconds, recursive_depth, type_of_sync, sc);
 		std::cout << "To stop real tyme sync write 's'";
 		while (s != "s")
 		{
@@ -166,17 +176,17 @@ int main(int argc, char *argv[])
 		folder_sync::folder_differences fd;
 		folder_sync::differentiate_folders(source, target, recursive_depth, fd);
 		std::ofstream ofs(compare_file.c_str());
-		folder_sync::write_diffs_to_file(fd,ofs );
+		folder_sync::write_diffs_to_file(fd, ofs);
 		return 0;
 	}
-	if (diffs_to_file)
+	if (diffs_from_file)
 	{
 		std::ifstream ifs(compare_file.c_str());
 		auto ftd = folder_sync::read_diffs_from_file(ifs);
 		for (auto && element : ftd)
 		{
 			std::error_code ec;
-			if (element.type==folder_sync::target)
+			if (element.type == folder_sync::target)
 			{
 				element.dt.copy_this(ec);
 			}
@@ -189,5 +199,11 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 	auto a = std::vector<fs::path>{ target };
-	folder_sync::synchronise(source, a, recursive_depth, type_of_sync);
+	if (compare_file_set)
+	{
+		std::ofstream ofs(compare_file.c_str());
+		folder_sync::synchronise(source, a, recursive_depth, type_of_sync, ofs);
+	}
+	else
+		folder_sync::synchronise(source, a, recursive_depth, type_of_sync);
 }
